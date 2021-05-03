@@ -56,20 +56,13 @@ def main(
 
     df_orig = pd.read_csv(output_csv, index_col="ID")
     valid_ids = df_orig.index.intersection(outputs.keys())
-    logging.info(f"Values for subject {list(valid_ids)} will be filled in")
     df_values = pd.Series({k: v for k, v in outputs.items() if k in valid_ids}, name=new_column_name)
-
-    #df_orig.columns = ['' if i == 'Unnamed: 0' else i for i in df_orig.columns ]
     df_new = pd.concat([df_orig, df_values], axis=1)
     df_new.index.name = "ID"
     df_new = df_new.reset_index()
-    # print(df_new.columns[[0,1]])
-
-    # df_new = df_new[df_new.columns[[1,0]]]
     df_new = df_new.rename(columns={"Unnamed: 0": ""})
     if not dryrun:
         df_new.to_csv('output.csv', index=False, columns=["", "ID", *df_new.columns[2:]])
-
     else:
         print(f"output csv: \n{df_new}")
 
