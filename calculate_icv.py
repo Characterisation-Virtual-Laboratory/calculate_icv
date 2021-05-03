@@ -62,7 +62,7 @@ def main(
     df_new = df_new.reset_index()
     df_new = df_new.rename(columns={"Unnamed: 0": ""})
     if not dryrun:
-        df_new.to_csv('output.csv', index=False, columns=["", "ID", *df_new.columns[2:]])
+        df_new.to_csv(output_csv_name, index=False, columns=["", "ID", *df_new.columns[2:]])
     else:
         print(f"output csv: \n{df_new}")
 
