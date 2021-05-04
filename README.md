@@ -15,8 +15,8 @@ SYNOPSIS
 
 DESCRIPTION
     We assume 
-    1. Executable xfm2det is under root dir
-    2. output file Cerebel_vols.csv is under root dir
+   1. Executable xfm2det is under root dir
+   2. output file Cerebel_vols.csv is under root dir
 
 FLAGS
 ```
