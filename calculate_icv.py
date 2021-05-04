@@ -25,15 +25,18 @@ def standardise_subject_id(subject_id):
 
 def main(
     freesurfer_dir=Path() / "freesurfer",
-    acapulco_dir=Path() / "acapulco_aachen",
+    output_csv=Path() / "acapulco_aachen" / "Cerebel_vols.csv",
     target_name="talairach.xfm",
     FS_template_volume_constant=1948105,
     new_column_name="ICV_CALC",
-    output_csv_name = "Cerebel_vols.csv",
+
     dryrun=False
 ):
     """
-    Assumptions
+    Run <freesurfer_dir>/xfm2det against all files named <target_name>,
+    then store the output value times <FS_template_volume_constant> into <output_csv> with column name <new_column_name>
+
+    Assumptions:
     1. Executable xfm2det is under freesurfer_dir (default: $PWD/freesurfer)
     2. output file (default: Cerebel_vols.csv) is under acapulco_dir (default: $PWD/acapulco_aachen)
     p.s. $PWD represent current working directory
@@ -44,7 +47,6 @@ def main(
         * If subject id is not found within the set of ID ===> the output value of xfm2det is ignored
     """
     exec = freesurfer_dir / "xfm2det"
-    output_csv = acapulco_dir / output_csv_name
 
     if not (exec.is_file() and os.access(exec, os.EX_OK)):
         raise Exception(f"{exec} is not executable, we assume xfm2det is under root directory {root}")
