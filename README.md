@@ -7,13 +7,13 @@ This script is used to calculate the ICV value from `subj-dir`/`mri`/`talairach.
 * Python module [Fire](https://github.com/google/python-fire)
 
 ## Usage
-NAME
+NAME. 
     `calculate_icv.py`
     
-SYNOPSIS
+SYNOPSIS. 
    `calculate_icv.py <flags>`
 
-DESCRIPTION
+DESCRIPTION. 
    We assume 
    1. Executable xfm2det is under root dir
    2. output file Cerebel_vols.csv is under root dir
