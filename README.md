@@ -21,7 +21,7 @@ DESCRIPTION
 FLAGS
 ```
     --root=ROOT
-        Default: '/f...
+        Default: current working directory
     --target_name=TARGET_NAME
         Default: 'talairach.xfm'
     --FS_template_volume_constant=FS_TEMPLATE_VOLUME_CONSTANT
