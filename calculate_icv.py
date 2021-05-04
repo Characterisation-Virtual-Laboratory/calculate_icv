@@ -13,6 +13,8 @@ def standardise_subject_id(subject_id):
     """
     1. strip trailing _temp
     2. Convert con00x => Cont_0x
+
+    e.g. con003_temp ===> Cont_03
     """
 
     subject_id = subject_id.strip("_temp")
@@ -22,7 +24,8 @@ def standardise_subject_id(subject_id):
     return subject_id
 
 def main(
-    root=os.getcwd(),
+    freesurfer_dir=Path() / "freesurfer",
+    acapulco_dir=Path() / "acapulco_aachen",
     target_name="talairach.xfm",
     FS_template_volume_constant=1948105,
     new_column_name="ICV_CALC",
@@ -30,18 +33,24 @@ def main(
     dryrun=False
 ):
     """
-    We assume
-    1. Executable xfm2det is under root dir
-    2. output file Cerebel_vols.csv is under root dir
+    Assumptions
+    1. Executable xfm2det is under freesurfer_dir (default: $PWD/freesurfer)
+    2. output file (default: Cerebel_vols.csv) is under acapulco_dir (default: $PWD/acapulco_aachen)
+    p.s. $PWD represent current working directory
+
+    Notes:
+    * In case that the subject id, which is parsed from the directory structure of target_name, is different from ID column of output csv
+        * If ID is not found within the set of subject id ===> the corresponding rows will remain empty
+        * If subject id is not found within the set of ID ===> the output value of xfm2det is ignored
     """
-    root = Path(root)
-    exec = root / "xfm2det"
-    output_csv = root / output_csv_name
+    exec = freesurfer_dir / "xfm2det"
+    output_csv = acapulco_dir / output_csv_name
+
     if not (exec.is_file() and os.access(exec, os.EX_OK)):
         raise Exception(f"{exec} is not executable, we assume xfm2det is under root directory {root}")
     if not (output_csv.is_file()):
         raise Exception(f"Output csv {output_csv} does not exist")
-    input_files = [p for p in root.glob("**/*.*") if p.name == target_name]
+    input_files = [p for p in freesurfer_dir.glob("**/*.*") if p.name == target_name]
 
     outputs = {}
 
@@ -62,7 +71,7 @@ def main(
     df_new = df_new.reset_index()
     df_new = df_new.rename(columns={"Unnamed: 0": ""})
     if not dryrun:
-        df_new.to_csv(output_csv_name, index=False, columns=["", "ID", *df_new.columns[2:]])
+        df_new.to_csv(output_csv, index=False, columns=["", "ID", *df_new.columns[2:]])
     else:
         print(f"output csv: \n{df_new}")
 
