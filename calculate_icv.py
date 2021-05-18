@@ -25,7 +25,9 @@ def standardise_subject_id(subject_id):
 
 def main(
     freesurfer_dir=Path() / "freesurfer",
-    output_csv=Path() / "acapulco_aachen" / "Cerebel_vols.csv",
+    # output_csv=Path() / "acapulco_aachen" / "Cerebel_vols.csv",
+    acapulco_dir=Path() / "acapulco_aachen",
+    output_csv_name="Cerebel_vols.csv",
     target_name="talairach.xfm",
     FS_template_volume_constant=1948105,
     new_column_name="ICV_CALC",
@@ -46,6 +48,8 @@ def main(
         * If ID is not found within the set of subject id ===> the corresponding rows will remain empty
         * If subject id is not found within the set of ID ===> the output value of xfm2det is ignored
     """
+    output_csv = Path(acapulco_dir) / output_csv_name
+
     freesurfer_dir = Path(freesurfer_dir)
     output_csv = Path(output_csv)
     exec = freesurfer_dir / "xfm2det"
