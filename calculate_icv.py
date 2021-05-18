@@ -6,8 +6,10 @@ import pandas as pd
 import os
 import logging
 import re
+from tabulate import tabulate
+from colorama import Fore, init
 #logging.basicConfig(level=logging.INFO)
-
+init(autoreset=True)
 
 def standardise_subject_id(subject_id):
     """
@@ -31,7 +33,7 @@ def main(
     target_name="talairach.xfm",
     FS_template_volume_constant=1948105,
     new_column_name="ICV_CALC",
-
+    debug=False,
     dryrun=False
 ):
     """
@@ -61,7 +63,7 @@ def main(
     input_files = [p for p in freesurfer_dir.glob("**/*.*") if p.name == target_name]
 
     outputs = {}
-
+    subject_ids_mapping = {}
     for i in input_files:
         if i.parent.name != "transforms" or i.parent.parent.name != "mri":
             logging.warning(f"Some directory structure does not compliant with the assumption of the directory structure, => {i}")
@@ -69,10 +71,25 @@ def main(
         command = f"{exec} {i}"
         proc = subprocess.run(command, shell=True, capture_output=True)
         value = float(proc.stdout.decode().split('\t')[-1].rstrip("\n"))
-        outputs[standardise_subject_id(subject_id)] = value * FS_template_volume_constant
+        subject_ids_mapping[subject_id] = standardise_subject_id(subject_id)
+        outputs[subject_ids_mapping[subject_id]] = value * FS_template_volume_constant
 
     df_orig = pd.read_csv(output_csv, index_col="ID")
     valid_ids = df_orig.index.intersection(outputs.keys())
+    if len(set(subject_ids_mapping.values())) < len(list(subject_ids_mapping.values())):
+        print(Fore.RED + f"There are Multiple subject ids mapped to the same id in {output_csv}, only the last subject will be processed")
+        inverse_mapping = {}
+        for k, v in subject_ids_mapping.items():
+            if not (v in inverse_mapping.keys()):
+                inverse_mapping[v] = [k]
+            else:
+                inverse_mapping[v].append(k)
+        for k, v in inverse_mapping.items():
+            if len(v) > 1:
+                print(Fore.RED + f"{v} ===> {k}")
+    if debug:
+        print(f"Table of IDs")
+        print(tabulate({f"{output_csv}": sorted(list(df_orig.index)), "subjects ids(original ids)": sorted([f'{v}({k})' for k,v in subject_ids_mapping.items()]), "valid_ids": sorted(valid_ids)}, tablefmt="github", headers='keys'))
     df_values = pd.Series({k: v for k, v in outputs.items() if k in valid_ids}, name=new_column_name)
     df_new = pd.concat([df_orig, df_values], axis=1)
     df_new.index.name = "ID"

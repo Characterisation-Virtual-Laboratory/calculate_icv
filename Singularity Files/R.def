@@ -66,7 +66,7 @@ From:      ubuntu:20.04
     echo "*********************************************************"
     echo "Installing python dependencies"
     echo "*********************************************************"
-    apt install -y python3-pip python3-pyqt5 pyqt5-dev python3-tk python3-pandas python3-fire
+    apt install -y python3-pip python3-pyqt5 pyqt5-dev python3-tk python3-pandas python3-fire python3-tabulate python3-colorama
 
     echo "*********************************************************"
     echo "Installing vglrun and TurboVNC"
