@@ -46,6 +46,8 @@ def main(
         * If ID is not found within the set of subject id ===> the corresponding rows will remain empty
         * If subject id is not found within the set of ID ===> the output value of xfm2det is ignored
     """
+    freesurfer_dir = Path(freesurfer_dir)
+    output_csv = Path(output_csv)
     exec = freesurfer_dir / "xfm2det"
 
     if not (exec.is_file() and os.access(exec, os.EX_OK)):
