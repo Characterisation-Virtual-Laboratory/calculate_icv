@@ -61,8 +61,6 @@ def main(
     if (len(valid_ids) != len(list(outputs.keys()))):
         print(Fore.RED + f"IDs from {output_csv} do not match subject ids found in directories")
         print(tabulate({f"{output_csv}": sorted(list(df_orig.index)), "subjects ids": sorted([f'{v}' for v in outputs.keys()]), "valid_ids": sorted(valid_ids)}, tablefmt="github", headers='keys'))
-        print(Fore.RED + f"stopping the script, {output_csv} remains unmodified")
-        return
 
 
 
