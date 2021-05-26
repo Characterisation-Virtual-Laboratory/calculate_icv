@@ -11,16 +11,7 @@ from colorama import Fore, init
 #logging.basicConfig(level=logging.INFO)
 init(autoreset=True)
 
-def standardise_subject_id(subject_id):
-    """
-    disabled
-    """
-    return subject_id
-    # subject_id = subject_id.strip("_temp")
-    # pat = re.compile("[con]{3}(\d{3})")
-    # if pat.match(subject_id):
-    #     subject_id = f"Cont_{pat.search(subject_id).group(1)[-2:]}"
-    # return subject_id
+
 
 def main(
     freesurfer_dir=Path() / "freesurfer",
@@ -30,7 +21,6 @@ def main(
     target_name="talairach.xfm",
     FS_template_volume_constant=1948105,
     new_column_name="ICV_CALC",
-    debug=False,
     dryrun=False
 ):
     """
@@ -41,11 +31,6 @@ def main(
     1. Executable xfm2det is under freesurfer_dir (default: $PWD/freesurfer)
     2. output file (default: Cerebel_vols.csv) is under acapulco_dir (default: $PWD/acapulco_aachen)
     p.s. $PWD represent current working directory
-
-    Notes:
-    * In case that the subject id, which is parsed from the directory structure of target_name, is different from ID column of output csv
-        * If ID is not found within the set of subject id ===> the corresponding rows will remain empty
-        * If subject id is not found within the set of ID ===> the output value of xfm2det is ignored
     """
     output_csv = Path(acapulco_dir) / output_csv_name
 
@@ -73,14 +58,19 @@ def main(
     df_orig = pd.read_csv(output_csv, index_col="ID")
     valid_ids = df_orig.index.intersection(outputs.keys())
 
-    ids_not_match = (len(valid_ids) != len(list(outputs.keys())))
-    if ids_not_match:
-        print(Fore.RED + "IDs from Cerebel_vols.csv do not match subject ids")
-    if debug or ids_not_match:
+    if (len(valid_ids) != len(list(outputs.keys()))):
+        print(Fore.RED + f"IDs from {output_csv} do not match subject ids found in directories")
         print(tabulate({f"{output_csv}": sorted(list(df_orig.index)), "subjects ids": sorted([f'{v}' for v in outputs.keys()]), "valid_ids": sorted(valid_ids)}, tablefmt="github", headers='keys'))
+        print(Fore.RED + f"stopping the script, {output_csv} remains unmodified")
+        return
+
 
 
     df_values = pd.Series({k: v for k, v in outputs.items() if k in valid_ids}, name=new_column_name, dtype=object)
+    if new_column_name in df_orig.columns:
+        print(Fore.RED + f"{new_column_name} exists as an column in {output_csv}, remove it first before running this script")
+
+
     df_new = pd.concat([df_orig, df_values], axis=1)
     df_new.index.name = "ID"
     df_new = df_new.reset_index()
