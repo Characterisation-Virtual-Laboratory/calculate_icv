@@ -13,17 +13,14 @@ init(autoreset=True)
 
 def standardise_subject_id(subject_id):
     """
-    1. strip trailing _temp
-    2. Convert con00x => Cont_0x
-
-    e.g. con003_temp ===> Cont_03
+    disabled
     """
-
-    subject_id = subject_id.strip("_temp")
-    pat = re.compile("[con]{3}(\d{3})")
-    if pat.match(subject_id):
-        subject_id = f"Cont_{pat.search(subject_id).group(1)[-2:]}"
     return subject_id
+    # subject_id = subject_id.strip("_temp")
+    # pat = re.compile("[con]{3}(\d{3})")
+    # if pat.match(subject_id):
+    #     subject_id = f"Cont_{pat.search(subject_id).group(1)[-2:]}"
+    # return subject_id
 
 def main(
     freesurfer_dir=Path() / "freesurfer",
@@ -63,7 +60,7 @@ def main(
     input_files = [p for p in freesurfer_dir.glob("**/*.*") if p.name == target_name]
 
     outputs = {}
-    subject_ids_mapping = {}
+
     for i in input_files:
         if i.parent.name != "transforms" or i.parent.parent.name != "mri":
             logging.warning(f"Some directory structure does not compliant with the assumption of the directory structure, => {i}")
@@ -71,26 +68,19 @@ def main(
         command = f"{exec} {i}"
         proc = subprocess.run(command, shell=True, capture_output=True)
         value = float(proc.stdout.decode().split('\t')[-1].rstrip("\n"))
-        subject_ids_mapping[subject_id] = standardise_subject_id(subject_id)
-        outputs[subject_ids_mapping[subject_id]] = value * FS_template_volume_constant
+        outputs[subject_id] = value * FS_template_volume_constant
 
     df_orig = pd.read_csv(output_csv, index_col="ID")
     valid_ids = df_orig.index.intersection(outputs.keys())
-    if len(set(subject_ids_mapping.values())) < len(list(subject_ids_mapping.values())):
-        print(Fore.RED + f"There are Multiple subject ids mapped to the same id in {output_csv}, only the last subject will be processed")
-        inverse_mapping = {}
-        for k, v in subject_ids_mapping.items():
-            if not (v in inverse_mapping.keys()):
-                inverse_mapping[v] = [k]
-            else:
-                inverse_mapping[v].append(k)
-        for k, v in inverse_mapping.items():
-            if len(v) > 1:
-                print(Fore.RED + f"{v} ===> {k}")
-    if debug:
-        print(f"Table of IDs")
-        print(tabulate({f"{output_csv}": sorted(list(df_orig.index)), "subjects ids(original ids)": sorted([f'{v}({k})' for k,v in subject_ids_mapping.items()]), "valid_ids": sorted(valid_ids)}, tablefmt="github", headers='keys'))
-    df_values = pd.Series({k: v for k, v in outputs.items() if k in valid_ids}, name=new_column_name)
+
+    ids_not_match = (len(valid_ids) != len(list(outputs.keys())))
+    if ids_not_match:
+        print(Fore.RED + "IDs from Cerebel_vols.csv do not match subject ids")
+    if debug or ids_not_match:
+        print(tabulate({f"{output_csv}": sorted(list(df_orig.index)), "subjects ids": sorted([f'{v}' for v in outputs.keys()]), "valid_ids": sorted(valid_ids)}, tablefmt="github", headers='keys'))
+
+
+    df_values = pd.Series({k: v for k, v in outputs.items() if k in valid_ids}, name=new_column_name, dtype=object)
     df_new = pd.concat([df_orig, df_values], axis=1)
     df_new.index.name = "ID"
     df_new = df_new.reset_index()
@@ -99,9 +89,6 @@ def main(
         df_new.to_csv(output_csv, index=False, columns=["", "ID", *df_new.columns[2:]])
     else:
         print(f"output csv: \n{df_new}")
-
-
-
 
 
 if __name__ == "__main__":
