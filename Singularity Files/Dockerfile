@@ -15,7 +15,7 @@ RUN echo "Setup and display environment"
 RUN echo "*********************************************************"
 RUN export LC_ALL=en_AU.UTF-8
 RUN export LANGUAGE=en_AU.UTF-8
-RUN export DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 RUN echo $LC_ALL
 RUN echo $LANGUAGE
 RUN echo $DEBIAN_FRONTEND
@@ -72,9 +72,8 @@ RUN add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-c
 RUN apt -y install r-base
 RUN apt update
 RUN apt -y install r-base gdebi-core libssl-dev curl libxml2-dev libcurl4-openssl-dev
-RUN cd /tmp/
-RUN wget https://download1.rstudio.org/desktop/bionic/amd64/rstudio-1.4.1106-amd64.deb
+RUN cd /tmp/ && wget https://download1.rstudio.org/desktop/bionic/amd64/rstudio-1.4.1106-amd64.deb
 RUN gdebi -q -n /tmp/rstudio-1.4.1106-amd64.deb
-RUN rm -rf rstudio-1.4.1106-amd64.deb
+RUN rm -rf /tmp/rstudio-1.4.1106-amd64.deb
 RUN Rscript /opt/dependencies.R
 CMD $*
