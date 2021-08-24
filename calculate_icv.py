@@ -25,7 +25,7 @@ class CalculateICV:
     ):
         self.freesurfer_dir = Path(freesurfer_dir)
         self.acapulco_dir = Path(acapulco_dir)
-        self.output_csv = self.acapulco / output_csv_name
+        self.output_csv = self.acapulco_dir / output_csv_name
         self.target_name = target_name
         self.FS_template_volume_constant = FS_template_volume_constant
         self.new_column_name = new_column_name
