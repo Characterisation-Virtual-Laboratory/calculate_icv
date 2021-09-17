@@ -96,7 +96,7 @@ class CalculateICV:
                     print(f"ICV corrected value for {subject_id} will be saved to {f.parent}/{f.stem}_CORR.csv")
                     print(data)
                 else:
-                    data.to_csv(f.parent / f"{f.stem}_CORR.csv")
+                    data.to_csv(f.parent / f"{f.stem}_CORR.csv", index=False)
             else:
                 print(Fore.RED + f"Cannot find input file {input_file}")
         return
