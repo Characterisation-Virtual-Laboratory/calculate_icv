@@ -21,6 +21,7 @@ class CalculateICV:
         target_name="talairach.xfm",
         FS_template_volume_constant=FS_TEMPLATE_VOLUME_CONSTANT,
         new_column_name="ICV_CALC",
+        icv_output=None,
         dryrun=False
     ):
         self.freesurfer_dir = Path(freesurfer_dir)
@@ -31,6 +32,7 @@ class CalculateICV:
         self.new_column_name = new_column_name
         self.dryrun = dryrun
         self.exec = self.freesurfer_dir / "xfm2det"
+        self.icv_output = icv_output
     def check_exec(self):
         if not (self.exec.is_file() and os.access(self.exec, os.EX_OK)):
             raise Exception(f"{self.exec} is not executable, we assume xfm2det is under root directory {self.freesurfer_dir}")
@@ -59,6 +61,17 @@ class CalculateICV:
 
     def calculate_icv(self):
         outputs = self._calculate_icv_batch(*self.input_files)
+        if self.icv_output is not None:
+            if not Path(self.icv_output).parent.exists():
+                raise Exception(f'Please make sure the parent direcotry of {(self.icv_output)} exists')
+            output_df = pd.Series(data=outputs)
+            if self.dryrun:
+                print(f"The following icv values will be saved to {self.icv_output}")
+                print(str(output_df))
+            else:
+                output_df.to_csv(self.icv_output, header=["ICV"], index_label="subjectID")
+
+            return
         df_orig = pd.read_csv(self.output_csv, index_col="ID")
         valid_ids = df_orig.index.intersection(outputs.keys())
 
