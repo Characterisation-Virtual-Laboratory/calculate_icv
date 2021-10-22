@@ -64,7 +64,7 @@ class CalculateICV:
         if self.icv_output is not None:
             if not Path(self.icv_output).parent.exists():
                 raise Exception(f'Please make sure the parent direcotry of {(self.icv_output)} exists')
-            output_df = pd.Series(data=outputs)
+            output_df = pd.Series(data=outputs).sort_index()
             if self.dryrun:
                 print(f"The following icv values will be saved to {self.icv_output}")
                 print(str(output_df))
