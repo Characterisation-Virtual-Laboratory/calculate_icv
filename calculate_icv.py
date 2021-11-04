@@ -59,7 +59,7 @@ class CalculateICV:
 
     def calculate_icv(self):
         outputs = self._calculate_icv_batch(*self.input_files)
-        df_orig = pd.read_csv(self.output_csv, index_col="ID")
+        df_orig = pd.read_csv(self.output_csv, dtype={'ID': str}).set_index('ID')
         valid_ids = df_orig.index.intersection(outputs.keys())
 
         if (len(valid_ids) != len(list(outputs.keys()))):
