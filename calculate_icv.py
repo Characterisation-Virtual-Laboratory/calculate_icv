@@ -54,7 +54,9 @@ class CalculateICV:
     def _calculate_icv(self, input_file):
         command = f"{self.exec} {input_file}"
         proc = subprocess.run(command, shell=True, capture_output=True)
-        value = float(proc.stdout.decode().split('\t')[-1].rstrip("\n"))
+        value_str = proc.stdout.decode().split('\t')[-1].rstrip("\n")
+        if self.dryrun: print(f"Running {self.exec} {input_file} => {value_str}")
+        value = float(value_str)
         return value * self.FS_template_volume_constant
 
     def calculate_icv(self):
